@@ -112,3 +112,15 @@ img { max-width: 100%; display: block; }
 /* Simple pages */
 .prose { max-width: 720px; padding-top: 24px; padding-bottom: 80px; line-height: 1.6; }
 .prose h1 { font-size: 44px; margin-bottom: 16px; }
+
+/* Admin */
+.input { height: 46px; border-radius: 12px; border: 1px solid #C9C2B2; padding: 0 12px; font: 16px var(--font-body), sans-serif; background: #fff; width: 100%; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 46px; font-weight: 600; font-size: 15px; }
+.check input { width: 22px; height: 22px; }
+.err { margin: 0; color: #A3341C; font-weight: 600; }
+.ok { margin: 0; color: var(--teal-dark); font-weight: 600; }
+.note { margin: 0 0 12px; color: var(--muted); }
+.admin-product { padding: 14px; display: flex; flex-wrap: wrap; gap: 16px; }
+.admin-thumb { width: 96px; height: 96px; border-radius: 12px; background: #ede8dd; overflow: hidden; flex: none; }
+.admin-thumb img { width: 100%; height: 100%; object-fit: cover; }

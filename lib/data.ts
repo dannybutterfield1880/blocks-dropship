@@ -1,7 +1,12 @@
 // Products come from lib/catalog.json (written by scripts/import-cj.mjs).
 // If the catalog is empty, the dummy products below are shown instead.
 // Prices are in pence.
+// Admin panel edits (hide / rename / reprice) live in lib/overrides.json and win over the catalog.
 import catalog from "./catalog.json";
+import overridesJson from "./overrides.json";
+
+export type Override = { hidden?: boolean; price?: number; name?: string; bestseller?: boolean };
+export const overrides = overridesJson as Record<string, Override>;
 
 export type Collection = {
   slug: string;
@@ -48,15 +53,36 @@ const dummy: Product[] = [
 
 const real = catalog as unknown as Product[];
 export const usingDummyData = real.length === 0;
-export const products: Product[] = usingDummyData ? dummy : real;
+export const baseProducts: Product[] = usingDummyData ? dummy : real;
+type Listed = Product & { hidden?: boolean };
+const applyOverride = (p: Product): Listed => {
+  const o = overrides[p.slug];
+  if (!o) return p;
+  return {
+    ...p,
+    ...(o.name ? { name: o.name } : {}),
+    ...(typeof o.price === "number" && o.price > 0 ? { price: o.price } : {}),
+    ...(typeof o.bestseller === "boolean" ? { bestseller: o.bestseller } : {}),
+    hidden: !!o.hidden,
+  };
+};
+
+// Every product, including hidden ones (admin panel + old orders use this).
+export const allProducts: Listed[] = baseProducts.map(applyOverride);
+// What shoppers see.
+export const products: Product[] = allProducts.filter((p) => !p.hidden);
 
 const flagged = products.filter((p) => p.bestseller).map((p) => p.slug);
-export const bestsellers = usingDummyData
-  ? ["fire-station-hq", "lunar-research-base", "gatehouse-fortress", "bonsai-tree"]
-  : (flagged.length ? flagged : products.map((p) => p.slug)).slice(0, 4);
+const fallback = usingDummyData
+  ? ["fire-station-hq", "lunar-research-base", "gatehouse-fortress", "bonsai-tree"].filter((s) => products.some((p) => p.slug === s))
+  : products.map((p) => p.slug);
+export const bestsellers = (flagged.length ? flagged : fallback).slice(0, 4);
 
 export const getCollection = (slug: string) => collections.find((c) => c.slug === slug);
+// Visible products only — used by shop pages and checkout, so hidden sets can't be bought.
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
+// Any product, hidden or not — used when processing orders already paid for.
+export const getAnyProduct = (slug: string) => allProducts.find((p) => p.slug === slug);
 export const productsIn = (slug: string) => products.filter((p) => p.collection === slug);
 
 export const formatPrice = (pence: number) =>

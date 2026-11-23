@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyStripeSignature, stripePost } from "@/lib/stripe";
-import { getProduct } from "@/lib/data";
+import { getAnyProduct } from "@/lib/data";
 import { cjConfigured, createCjOrder } from "@/lib/cj";
 
 // Stripe calls this when a payment completes. We place the matching order with CJ
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .map((x: string) => {
       const [slug, qty] = x.split("*");
-      const p = getProduct(slug);
+      const p = getAnyProduct(slug);
       return { slug, qty: Number(qty), name: p?.name, vid: p?.cj?.vid };
     });
 

@@ -10,7 +10,7 @@ Next.js 15 (App Router) · TypeScript · plain CSS · deploys to Vercel.
 - [x] **Step 2 – CJ product import**: search + import scripts, run from Termux, write `lib/catalog.json`
 - [x] **Step 3 – Stripe Checkout**: basket → Stripe hosted checkout (UK address + phone), webhook logs paid orders
 - [x] **Step 4 – Auto-fulfilment**: paid order → CJ order (cheapest UK shipping) → daily tracking check → tracking email
-- [ ] Step 5 – Admin panel
+- [x] **Step 5 – Admin panel**: `/admin` — orders + CJ/tracking status, hide/rename/reprice products
 - [ ] Step 6 – Launch (domain, legal pages, cookie banner, Vercel Pro / Netlify)
 
 ## Deploy
@@ -54,6 +54,21 @@ Extra environment variables in Vercel:
 Order status lives on each payment in Stripe → Payments → (payment) → Metadata:
 `cj_status` = `ordered` → `shipped` (with `tracking`), or `manual` if it couldn't be sent to CJ (product with no CJ variant, or `CJ_API_KEY` missing). Search Vercel → Logs for `MANUAL ORDER NEEDED` or `CJ ORDER FAILED`.
 
+## Admin panel (`/admin`)
+
+- **Orders**: last 50 paid orders with customer, items, total and status (Sent to CJ / Shipped / Needs manual order), plus a "Check tracking now" button.
+- **Products**: change name and price, hide a product, mark bestsellers. Saving commits `lib/overrides.json` to GitHub and Vercel redeploys (~1 min). Re-importing from CJ keeps these edits.
+
+Environment variables in Vercel:
+
+| Variable | Value |
+|---|---|
+| `ADMIN_PASSWORD` | A long password for `/admin` |
+| `GITHUB_TOKEN` | GitHub → Settings → Developer settings → **Fine-grained tokens** → only `blocks-dropship`, permission **Contents: Read and write** |
+| `GITHUB_REPO` | Optional, default `dannybutterfield1880/blocks-dropship` |
+
+Because the admin panel commits to GitHub, always `git pull` before pushing from Termux (the `blocks` command does this for you).
+
 ## Adding real products (CJ Dropshipping)
 
 One-off setup in Termux:
@@ -69,7 +84,7 @@ Then, from the `blocks-dropship` folder:
 node scripts/search-cj.mjs "building blocks castle"   # find products + their PIDs
 # add the PIDs you like to picks.json
 node scripts/import-cj.mjs                           # pulls them into lib/catalog.json
-git add . && git commit -m "Update products" && git push
+git add . && git commit -m "Update products" && git pull --no-rebase && git push
 ```
 
 Each entry in `picks.json`:
