@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { collections, bestsellers, getProduct, Product } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
+import { settings } from "@/lib/settings";
+import { formatPrice } from "@/lib/data";
 
 function Cube({ top, left, right, size = 96 }: { top: string; left: string; right: string; size?: number }) {
   return (
@@ -40,9 +42,13 @@ export default function Home() {
       <section className="wrap section">
         <div className="trust">
           <div><strong>Fits major brands</strong><span>Mix with bricks you own</span></div>
-          <div><strong>Free UK delivery</strong><span>On orders over [£X]</span></div>
+          {settings.freeDeliveryOver > 0 ? (
+            <div><strong>Free UK delivery</strong><span>On orders over {formatPrice(settings.freeDeliveryOver)}</span></div>
+          ) : (
+            <div><strong>UK delivery</strong><span>{formatPrice(settings.deliveryFee)} per order</span></div>
+          )}
           <div><strong>Safety tested</strong><span>UKCA / CE marked</span></div>
-          <div><strong>[X]-day returns</strong><span>Unopened sets</span></div>
+          <div><strong>{settings.returnsDays}-day returns</strong><span>Unopened sets</span></div>
         </div>
       </section>
 

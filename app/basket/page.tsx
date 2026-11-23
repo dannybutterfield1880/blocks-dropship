@@ -5,8 +5,10 @@ import { useState } from "react";
 import { useBasket } from "@/lib/basket";
 import { getProduct, formatPrice } from "@/lib/data";
 
-// Keep in step with FREE_DELIVERY_OVER in Vercel (pence). Display only — the real rule is on the server.
-const FREE_OVER = parseInt(process.env.NEXT_PUBLIC_FREE_DELIVERY_OVER || "5000", 10);
+import { settings } from "@/lib/settings";
+
+// Display only — the real rule is applied on the server at checkout.
+const FREE_OVER = settings.freeDeliveryOver;
 
 export default function BasketPage() {
   const { lines, setQty } = useBasket();
@@ -70,7 +72,7 @@ export default function BasketPage() {
             <span className="price" style={{ fontSize: 24 }}>{formatPrice(total)}</span>
           </div>
           <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-            Delivery is added at checkout (UK only). Free over {formatPrice(FREE_OVER)}.
+            Delivery ({formatPrice(settings.deliveryFee)}) is added at checkout. UK only.{FREE_OVER > 0 ? ` Free over ${formatPrice(FREE_OVER)}.` : ""}
           </p>
           <button className="btn btn-accent btn-big" onClick={checkout} disabled={busy} style={busy ? { opacity: 0.7 } : undefined}>
             {busy ? "Taking you to checkout…" : "Checkout securely"}

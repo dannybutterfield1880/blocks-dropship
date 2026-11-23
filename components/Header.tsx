@@ -3,13 +3,15 @@
 import Link from "next/link";
 import Logo from "./Logo";
 import { useBasket } from "@/lib/basket";
+import { settings } from "@/lib/settings";
+import { formatPrice } from "@/lib/data";
 
 export default function Header() {
   const { count } = useBasket();
   return (
     <>
       <div className="announce">
-        <span>Free UK delivery over [£X]</span>
+        {settings.freeDeliveryOver > 0 ? <span>Free UK delivery over {formatPrice(settings.freeDeliveryOver)}</span> : <span>UK delivery {formatPrice(settings.deliveryFee)}</span>}
         <span>Fits all major brick brands</span>
         <span>Safety tested to UKCA / CE</span>
       </div>

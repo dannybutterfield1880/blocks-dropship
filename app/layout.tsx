@@ -9,9 +9,13 @@ const heading = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700",
 const logo = Fredoka({ subsets: ["latin"], weight: ["700"], variable: "--font-logo" });
 const body = Inter({ subsets: ["latin"], variable: "--font-body" });
 
+const description = "Detailed building sets: cities, castles, starships and more. Fits all major brick brands.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SITE_URL || "https://blocks-dropship.vercel.app"),
   title: "blocks — building sets for every builder",
-  description: "Detailed building sets: cities, castles, starships and more. Fits all major brick brands.",
+  description,
+  openGraph: { title: "blocks — building sets for every builder", description, siteName: "blocks", locale: "en_GB", type: "website" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

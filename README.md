@@ -11,7 +11,7 @@ Next.js 15 (App Router) · TypeScript · plain CSS · deploys to Vercel.
 - [x] **Step 3 – Stripe Checkout**: basket → Stripe hosted checkout (UK address + phone), webhook logs paid orders
 - [x] **Step 4 – Auto-fulfilment**: paid order → CJ order (cheapest UK shipping) → daily tracking check → tracking email
 - [x] **Step 5 – Admin panel**: `/admin` — orders + CJ/tracking status, hide/rename/reprice products
-- [ ] Step 6 – Launch (domain, legal pages, cookie banner, Vercel Pro / Netlify)
+- [x] **Step 6 – Launch prep**: admin Settings (seller details, delivery, returns), terms / privacy / returns / delivery / contact pages, sitemap, robots, favicon
 
 ## Deploy
 
@@ -27,9 +27,6 @@ Set these in Vercel → Project → **Settings → Environment Variables**, then
 |---|---|
 | `STRIPE_SECRET_KEY` | Stripe → Developers → API keys → Secret key (`sk_test_…` while testing) |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` from the webhook below |
-| `DELIVERY_FEE` | Optional, pence. Default `399` (£3.99) |
-| `FREE_DELIVERY_OVER` | Optional, pence. Default `5000` (£50) |
-| `NEXT_PUBLIC_FREE_DELIVERY_OVER` | Same number as above (shown in the basket) |
 
 Webhook: Stripe → Developers → Webhooks → **Add destination** → endpoint
 `https://YOUR-SITE.vercel.app/api/stripe-webhook`, event `checkout.session.completed`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
@@ -54,9 +51,22 @@ Extra environment variables in Vercel:
 Order status lives on each payment in Stripe → Payments → (payment) → Metadata:
 `cj_status` = `ordered` → `shipped` (with `tracking`), or `manual` if it couldn't be sent to CJ (product with no CJ variant, or `CJ_API_KEY` missing). Search Vercel → Logs for `MANUAL ORDER NEEDED` or `CJ ORDER FAILED`.
 
+## Go-live checklist
+
+1. **Admin → Settings**: fill in legal name, email and business address (shows on terms, privacy, contact and footer). Check delivery fee, delivery times and returns window.
+2. **Products**: import real sets from CJ, set names/prices in Admin → Products, then hide or delete anything dummy.
+3. **Domain**: buy one (e.g. `.co.uk`), add it in Vercel → Project → Settings → Domains, then set `SITE_URL` to `https://yourdomain.co.uk`.
+4. **Hosting plan**: move to Vercel Pro (Hobby is non-commercial only) — or Netlify — before the first real sale.
+5. **Emails**: verify the domain in Resend, set `EMAIL_FROM` to an address on it.
+6. **Stripe live mode**: activate the account, swap `STRIPE_SECRET_KEY` to the live `sk_live_…` key, create a new live webhook and update `STRIPE_WEBHOOK_SECRET`. Turn on Stripe's customer receipt emails for successful payments (in Stripe settings) so customers get an order confirmation.
+7. **CJ**: top up the CJ balance; once a few orders have gone through fine, consider `CJ_PAY_TYPE=2` for hands-off ordering.
+8. **Test order** with a real card for a cheap set, then refund it in Stripe.
+9. **Check**: product safety marking (UKCA/CE) and test reports from CJ for each set; VAT rules for goods shipped from abroad (ask an accountant).
+
 ## Admin panel (`/admin`)
 
 - **Orders**: last 50 paid orders with customer, items, total and status (Sent to CJ / Shipped / Needs manual order), plus a "Check tracking now" button.
+- **Settings**: seller details, delivery fee / free-delivery threshold / times, returns window. Saved to `lib/settings.json`.
 - **Products**: change name and price, hide a product, mark bestsellers. Saving commits `lib/overrides.json` to GitHub and Vercel redeploys (~1 min). Re-importing from CJ keeps these edits.
 
 Environment variables in Vercel:

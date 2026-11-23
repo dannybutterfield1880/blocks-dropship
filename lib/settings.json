@@ -1,0 +1,15 @@
+{
+  "shopName": "blocks",
+  "legalName": "",
+  "email": "",
+  "phone": "",
+  "address": "",
+  "companyNumber": "",
+  "vatNumber": "",
+  "deliveryFee": 399,
+  "freeDeliveryOver": 5000,
+  "deliveryTime": "7–12 working days",
+  "dispatchTime": "1–3 working days",
+  "returnsDays": 30,
+  "returnPostagePaidBy": "customer"
+}

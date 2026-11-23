@@ -62,5 +62,10 @@ export function verifyStripeSignature(rawBody: string, header: string | null, se
   return sigs.some((s) => s.length === expected.length && crypto.timingSafeEqual(Buffer.from(s), Buffer.from(expected)));
 }
 
-export const deliveryFee = () => parseInt(process.env.DELIVERY_FEE || "399", 10); // pence
-export const freeDeliveryOver = () => parseInt(process.env.FREE_DELIVERY_OVER || "5000", 10); // pence
+import { settings } from "./settings";
+// Set in Admin → Settings. Env vars DELIVERY_FEE / FREE_DELIVERY_OVER still override if present.
+export const deliveryFee = () => parseInt(process.env.DELIVERY_FEE || String(settings.deliveryFee), 10); // pence
+export const freeDeliveryOver = () => {
+  const v = parseInt(process.env.FREE_DELIVERY_OVER || String(settings.freeDeliveryOver), 10);
+  return v > 0 ? v : Infinity; // 0 = never free
+};

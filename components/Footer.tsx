@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "./Logo";
+import { settings, tradingAs } from "@/lib/settings";
 
 export default function Footer() {
   return (
@@ -17,13 +18,21 @@ export default function Footer() {
         <div className="footer-col">
           <strong>Help</strong>
           <Link href="/info/delivery">Delivery</Link>
-          <Link href="/info/returns">Returns</Link>
+          <Link href="/info/returns">Returns &amp; refunds</Link>
           <Link href="/info/contact">Contact us</Link>
         </div>
         <div className="footer-col">
-          <strong>Safety</strong>
+          <strong>Legal</strong>
+          <Link href="/info/terms">Terms of sale</Link>
+          <Link href="/info/privacy">Privacy &amp; cookies</Link>
           <span>Not suitable for children under 3. Small parts.</span>
         </div>
+      </div>
+      <div className="wrap footer-legal">
+        © {new Date().getFullYear()} {tradingAs()}
+        {settings.companyNumber ? ` · Company no. ${settings.companyNumber}` : ""}
+        {settings.vatNumber ? ` · VAT no. ${settings.vatNumber}` : ""}
+        {" · "}Compatible with major brick brands. Not affiliated with or endorsed by any other toy brand.
       </div>
     </footer>
   );
