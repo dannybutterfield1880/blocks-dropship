@@ -9,7 +9,7 @@ Next.js 15 (App Router) · TypeScript · plain CSS · deploys to Vercel.
 - [x] **Step 1 – Storefront**: home, shop (with builder-level filter), collection, product, basket, info pages. Dummy data in `lib/data.ts`.
 - [x] **Step 2 – CJ product import**: search + import scripts, run from Termux, write `lib/catalog.json`
 - [x] **Step 3 – Stripe Checkout**: basket → Stripe hosted checkout (UK address + phone), webhook logs paid orders
-- [ ] Step 4 – Auto-fulfilment (Stripe webhook → supplier order → tracking email)
+- [x] **Step 4 – Auto-fulfilment**: paid order → CJ order (cheapest UK shipping) → daily tracking check → tracking email
 - [ ] Step 5 – Admin panel
 - [ ] Step 6 – Launch (domain, legal pages, cookie banner, Vercel Pro / Netlify)
 
@@ -35,6 +35,24 @@ Webhook: Stripe → Developers → Webhooks → **Add destination** → endpoint
 `https://YOUR-SITE.vercel.app/api/stripe-webhook`, event `checkout.session.completed`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
 
 Test with card `4242 4242 4242 4242`, any future date, any CVC. Paid orders show in the Stripe dashboard and as `NEW ORDER` lines in Vercel → Logs.
+
+## Auto-fulfilment (CJ + tracking emails)
+
+When Stripe confirms a payment, the webhook places the same order with CJ (UK address, cheapest shipping method) and tags the Stripe payment with the CJ order id. Every morning at 9am UTC, `/api/cron/tracking` checks those orders with CJ and emails the customer once a tracking number exists.
+
+Extra environment variables in Vercel:
+
+| Variable | Value |
+|---|---|
+| `CJ_API_KEY` | Same key used by the import scripts |
+| `CJ_PAY_TYPE` | `3` (default) = order is created, you confirm + pay in the CJ dashboard. `2` = paid automatically from your CJ balance |
+| `CJ_LOGISTIC` | Optional. Force one shipping method, e.g. `CJPacket Ordinary` |
+| `RESEND_API_KEY` | From resend.com (free tier) |
+| `EMAIL_FROM` | e.g. `blocks <orders@yourdomain.co.uk>` — needs a domain verified in Resend |
+| `CRON_SECRET` | Any long random string (stops strangers triggering the tracking check) |
+
+Order status lives on each payment in Stripe → Payments → (payment) → Metadata:
+`cj_status` = `ordered` → `shipped` (with `tracking`), or `manual` if it couldn't be sent to CJ (product with no CJ variant, or `CJ_API_KEY` missing). Search Vercel → Logs for `MANUAL ORDER NEEDED` or `CJ ORDER FAILED`.
 
 ## Adding real products (CJ Dropshipping)
 
