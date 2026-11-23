@@ -1,11 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useBasket } from "@/lib/basket";
 import { getProduct, formatPrice } from "@/lib/data";
 
+// Keep in step with FREE_DELIVERY_OVER in Vercel (pence). Display only — the real rule is on the server.
+const FREE_OVER = parseInt(process.env.NEXT_PUBLIC_FREE_DELIVERY_OVER || "5000", 10);
+
 export default function BasketPage() {
   const { lines, setQty } = useBasket();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const checkout = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lines }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data.error || "Something went wrong. Please try again.");
+    } catch {
+      setError("Couldn't reach checkout. Check your connection and try again.");
+    }
+    setBusy(false);
+  };
   const rows = lines
     .map((l) => ({ ...l, p: getProduct(l.slug) }))
     .filter((r) => r.p);
@@ -42,10 +69,17 @@ export default function BasketPage() {
             <strong style={{ fontSize: 20 }}>Total</strong>
             <span className="price" style={{ fontSize: 24 }}>{formatPrice(total)}</span>
           </div>
-          {/* Step 3: this button calls /api/checkout and redirects to Stripe Checkout */}
-          <button className="btn btn-accent btn-big" disabled style={{ opacity: 0.6, cursor: "not-allowed" }}>
-            Checkout (coming in step 3)
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
+            Delivery is added at checkout (UK only). Free over {formatPrice(FREE_OVER)}.
+          </p>
+          <button className="btn btn-accent btn-big" onClick={checkout} disabled={busy} style={busy ? { opacity: 0.7 } : undefined}>
+            {busy ? "Taking you to checkout…" : "Checkout securely"}
           </button>
+          {error && (
+            <p role="alert" style={{ margin: 0, color: "#A3341C", fontWeight: 600 }}>
+              {error}
+            </p>
+          )}
         </div>
       )}
     </section>

@@ -8,7 +8,7 @@ Next.js 15 (App Router) · TypeScript · plain CSS · deploys to Vercel.
 
 - [x] **Step 1 – Storefront**: home, shop (with builder-level filter), collection, product, basket, info pages. Dummy data in `lib/data.ts`.
 - [x] **Step 2 – CJ product import**: search + import scripts, run from Termux, write `lib/catalog.json`
-- [ ] Step 3 – Stripe Checkout
+- [x] **Step 3 – Stripe Checkout**: basket → Stripe hosted checkout (UK address + phone), webhook logs paid orders
 - [ ] Step 4 – Auto-fulfilment (Stripe webhook → supplier order → tracking email)
 - [ ] Step 5 – Admin panel
 - [ ] Step 6 – Launch (domain, legal pages, cookie banner, Vercel Pro / Netlify)
@@ -18,6 +18,23 @@ Next.js 15 (App Router) · TypeScript · plain CSS · deploys to Vercel.
 1. Push this repo to GitHub.
 2. On vercel.com → **Add New → Project** → import `blocks-dropship` → Deploy. No settings needed.
 3. Every push to `main` redeploys automatically.
+
+## Payments (Stripe)
+
+Set these in Vercel → Project → **Settings → Environment Variables**, then redeploy:
+
+| Variable | Value |
+|---|---|
+| `STRIPE_SECRET_KEY` | Stripe → Developers → API keys → Secret key (`sk_test_…` while testing) |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` from the webhook below |
+| `DELIVERY_FEE` | Optional, pence. Default `399` (£3.99) |
+| `FREE_DELIVERY_OVER` | Optional, pence. Default `5000` (£50) |
+| `NEXT_PUBLIC_FREE_DELIVERY_OVER` | Same number as above (shown in the basket) |
+
+Webhook: Stripe → Developers → Webhooks → **Add destination** → endpoint
+`https://YOUR-SITE.vercel.app/api/stripe-webhook`, event `checkout.session.completed`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
+
+Test with card `4242 4242 4242 4242`, any future date, any CVC. Paid orders show in the Stripe dashboard and as `NEW ORDER` lines in Vercel → Logs.
 
 ## Adding real products (CJ Dropshipping)
 
