@@ -15,7 +15,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <section className="wrap pdp">
-      <div className="product-img">{p.image ? <img src={p.image} alt={p.name} /> : "[Product photo]"}</div>
+      <div className="stack" style={{ gap: 12 }}>
+        <div className="product-img">{p.image ? <img src={p.image} alt={p.name} /> : "[Product photo]"}</div>
+        {p.images && p.images.length > 1 && (
+          <div className="thumbs">
+            {p.images.slice(1, 5).map((src, i) => (
+              <img key={src} src={src} alt={`${p.name} – view ${i + 2}`} />
+            ))}
+          </div>
+        )}
+      </div>
       <div className="stack">
         {c && (
           <Link href={`/collections/${c.slug}`} style={{ fontWeight: 600 }}>
@@ -26,7 +35,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <span className="price" style={{ fontSize: 28 }}>{formatPrice(p.price)}</span>
         <p style={{ fontSize: 18, lineHeight: 1.6, margin: 0 }}>{p.description}</p>
         <div className="facts">
-          <span>{p.pieces} pieces</span>
+          {p.pieces > 0 && <span>{p.pieces} pieces</span>}
           <span>Ages {p.age}+</span>
           <span>Fits major brick brands</span>
         </div>

@@ -1,5 +1,7 @@
-// DUMMY DATA for step 1. In step 2 this gets replaced by products pulled
-// from the supplier API into Supabase. Prices are in pence.
+// Products come from lib/catalog.json (written by scripts/import-cj.mjs).
+// If the catalog is empty, the dummy products below are shown instead.
+// Prices are in pence.
+import catalog from "./catalog.json";
 
 export type Collection = {
   slug: string;
@@ -16,7 +18,10 @@ export type Product = {
   pieces: number;
   age: number;
   description: string;
-  image?: string; // filled from supplier in step 2
+  image?: string;
+  images?: string[];
+  bestseller?: boolean;
+  cj?: { pid: string; vid?: string; variantSku?: string; costUsd?: number };
 };
 
 export const collections: Collection[] = [
@@ -28,7 +33,7 @@ export const collections: Collection[] = [
   { slug: "bloom", name: "Bloom", blurb: "Flowers and plants that never wilt", colour: "#8A4E68" },
 ];
 
-export const products: Product[] = [
+const dummy: Product[] = [
   { slug: "fire-station-hq", name: "Fire Station HQ", collection: "metro", price: 3999, pieces: 820, age: 8, description: "A three-bay fire station with a working garage door, ladder truck and rooftop helipad." },
   { slug: "city-ambulance", name: "City Ambulance", collection: "metro", price: 1499, pieces: 240, age: 6, description: "Quick build rescue van with opening rear doors and stretcher." },
   { slug: "lunar-research-base", name: "Lunar Research Base", collection: "orbit", price: 4999, pieces: 1100, age: 9, description: "Modular moon base with a lab, docking bay and six-wheel rover." },
@@ -41,7 +46,14 @@ export const products: Product[] = [
   { slug: "wildflower-bouquet", name: "Wildflower Bouquet", collection: "bloom", price: 3499, pieces: 940, age: 14, description: "Twelve stems of build-it-yourself wildflowers." },
 ];
 
-export const bestsellers = ["fire-station-hq", "lunar-research-base", "gatehouse-fortress", "bonsai-tree"];
+const real = catalog as unknown as Product[];
+export const usingDummyData = real.length === 0;
+export const products: Product[] = usingDummyData ? dummy : real;
+
+const flagged = products.filter((p) => p.bestseller).map((p) => p.slug);
+export const bestsellers = usingDummyData
+  ? ["fire-station-hq", "lunar-research-base", "gatehouse-fortress", "bonsai-tree"]
+  : (flagged.length ? flagged : products.map((p) => p.slug)).slice(0, 4);
 
 export const getCollection = (slug: string) => collections.find((c) => c.slug === slug);
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);

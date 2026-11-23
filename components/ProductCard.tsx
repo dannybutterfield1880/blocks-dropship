@@ -11,7 +11,7 @@ export default function ProductCard({ p }: { p: Product }) {
       <div className="meta">
         <span>{getCollection(p.collection)?.name}</span>
         <span>
-          {p.pieces} pcs · Ages {p.age}+
+          {p.pieces > 0 ? `${p.pieces} pcs · ` : ""}Ages {p.age}+
         </span>
       </div>
       <h3>
